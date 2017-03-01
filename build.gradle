@@ -1,0 +1,18 @@
+subprojects {
+    apply plugin: 'groovy'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.9'
+        compile group: 'com.google.guava', name: 'guava', version: '21.0'
+
+        testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.4'
+    }
+}

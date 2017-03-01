@@ -1,0 +1,5 @@
+dependencies {
+    compile project(':eig.model')
+    compile group: 'com.xlson.groovycsv', name: 'groovycsv', version: '1.1'
+
+}
