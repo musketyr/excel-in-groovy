@@ -1,1 +1,1 @@
-include 'eig.model', 'eig.model.test'
+include 'eig.model', 'eig.model.test', 'eig.tasks'
