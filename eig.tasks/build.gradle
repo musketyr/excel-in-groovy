@@ -1,6 +1,6 @@
 dependencies {
     compile project(':eig.model')
-    compile 'org.modelcatalogue:spreadsheet-builder-poi:0.3.4'
+    compile 'org.modelcatalogue:spreadsheet-builder-poi:0.3.5'
 
     testCompile project(':eig.model.test')
 }
