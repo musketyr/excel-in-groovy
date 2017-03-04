@@ -43,4 +43,9 @@ final class OrderLine {
         result = 31 * result + (product != null ? product.hashCode() : 0)
         return result
     }
+
+    @Override
+    String toString() {
+        return "Order Line #${line}"
+    }
 }

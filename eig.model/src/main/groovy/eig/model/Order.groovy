@@ -44,4 +44,9 @@ final class Order {
         result = 31 * result + (lines != null ? lines.hashCode() : 0)
         return result
     }
+
+    @Override
+    String toString() {
+        return "Order #${number}"
+    }
 }
