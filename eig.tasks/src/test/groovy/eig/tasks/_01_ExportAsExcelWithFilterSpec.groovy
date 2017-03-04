@@ -2,17 +2,18 @@ package eig.tasks
 
 import eig.model.test.TestData
 import eig.model.test.TestFiles
+import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.modelcatalogue.spreadsheet.api.Cell
 import org.modelcatalogue.spreadsheet.query.api.SpreadsheetCriteria
 import org.modelcatalogue.spreadsheet.query.poi.PoiSpreadsheetCriteria
 import spock.lang.Specification
 
-class _01_ExportAsExcelSpec extends Specification {
+class _01_ExportAsExcelWithFilterSpec extends Specification {
 
-    void 'plain export to excel'() {
+    void 'export to excel with filter'() {
         when:
             File excelFile = TestFiles.newTestFile('test01.xlsx')
-            ExcelExporter.buildSimpleSpreadsheet(TestData.orders).writeTo(excelFile)
+            ExcelExporter.buildSpreadsheetWithFilter(TestData.orders).writeTo(excelFile)
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)
@@ -158,6 +159,15 @@ class _01_ExportAsExcelSpec extends Specification {
                         cell('A') {
                             value 10107
             }   }   }   }
+        when:
+            XSSFSheet sheet = criteria.all().first().row.sheet as XSSFSheet
+        then: 'test automatic filter'
+            sheet.getCTWorksheet()
+            sheet.getCTWorksheet().autoFilter
+            sheet.getCTWorksheet().autoFilter.ref == 'A1:V2824'
+        and: 'test scroll lock'
+            sheet.defaultSheetView.pane.setXSplit
+            sheet.defaultSheetView.pane.setYSplit
     }
 
 }

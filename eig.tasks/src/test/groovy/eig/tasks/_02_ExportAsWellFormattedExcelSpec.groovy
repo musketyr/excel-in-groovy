@@ -2,16 +2,15 @@ package eig.tasks
 
 import eig.model.test.TestData
 import eig.model.test.TestFiles
-import org.modelcatalogue.spreadsheet.api.Cell
 import org.modelcatalogue.spreadsheet.query.api.SpreadsheetCriteria
 import org.modelcatalogue.spreadsheet.query.poi.PoiSpreadsheetCriteria
 import spock.lang.Specification
 
-class _03_ExportAsWellFormattedExcelSpec extends Specification {
+class _02_ExportAsWellFormattedExcelSpec extends Specification {
 
     void 'export well formatted excel'() {
         when:
-            File excelFile = TestFiles.newTestFile('test03.xlsx')
+            File excelFile = TestFiles.newTestFile('test02.xlsx')
             ExcelExporter.buildWellFormattedSpreadsheet(TestData.orders).writeTo(excelFile)
             TestFiles.open excelFile
         and:

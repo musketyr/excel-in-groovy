@@ -8,12 +8,12 @@ import org.modelcatalogue.spreadsheet.query.poi.PoiSpreadsheetCriteria
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class _04_ExportOrderAsExcelSpec extends Specification {
+class _03_ExportOrderAsExcelSpec extends Specification {
 
     @Unroll
     void 'export order for #territory'() {
         when:
-            File excelFile = TestFiles.newTestFile("test04-${territory}.xlsx")
+            File excelFile = TestFiles.newTestFile("test03-${territory}.xlsx")
             ExcelExporter.buildOrder(TestData.orders.values().find { it.customer.territory == territory } ).writeTo(excelFile)
             TestFiles.open excelFile
         and:
