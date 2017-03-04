@@ -12,7 +12,7 @@ class _04_FillDataSpec extends Specification {
     void 'export sales graphs'() {
         when:
             File excelFile = TestFiles.newTestFile("test04.xlsx")
-            ExcelExporter.fillData(TestData.orders).writeTo(excelFile)
+            ExcelIntegration.fillData(TestData.orders).writeTo(excelFile)
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)

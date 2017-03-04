@@ -14,7 +14,7 @@ class _03_ExportOrderAsExcelSpec extends Specification {
     void 'export order for #territory'() {
         when:
             File excelFile = TestFiles.newTestFile("test03-${territory}.xlsx")
-            ExcelExporter.buildOrder(TestData.orders.values().find { it.customer.territory == territory } ).writeTo(excelFile)
+            ExcelIntegration.buildOrder(TestData.orders.values().find { it.customer.territory == territory } ).writeTo(excelFile)
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)

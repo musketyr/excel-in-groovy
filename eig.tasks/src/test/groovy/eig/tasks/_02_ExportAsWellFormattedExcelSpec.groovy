@@ -11,7 +11,7 @@ class _02_ExportAsWellFormattedExcelSpec extends Specification {
     void 'export well formatted excel'() {
         when:
             File excelFile = TestFiles.newTestFile('test02.xlsx')
-            ExcelExporter.buildWellFormattedSpreadsheet(TestData.orders).writeTo(excelFile)
+            ExcelIntegration.buildWellFormattedSpreadsheet(TestData.orders).writeTo(excelFile)
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)

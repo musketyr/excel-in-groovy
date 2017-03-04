@@ -9,7 +9,7 @@ class _06_ImportOrdersSpec extends Specification {
 
     void 'load orders'() {
         when:
-            List<Order> orders = ExcelExporter.loadOrders(TestData.testExcelDataStream)
+            List<Order> orders = ExcelIntegration.loadOrders(TestData.testExcelDataStream)
         then:
             orders.size() == TestData.orders.size()
             orders.each {

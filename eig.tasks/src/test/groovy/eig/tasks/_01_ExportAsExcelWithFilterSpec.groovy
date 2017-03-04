@@ -13,7 +13,7 @@ class _01_ExportAsExcelWithFilterSpec extends Specification {
     void 'export to excel with filter'() {
         when:
             File excelFile = TestFiles.newTestFile('test01.xlsx')
-            ExcelExporter.buildSpreadsheetWithFilter(TestData.orders).writeTo(excelFile)
+            ExcelIntegration.buildSpreadsheetWithFilter(TestData.orders).writeTo(excelFile)
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)

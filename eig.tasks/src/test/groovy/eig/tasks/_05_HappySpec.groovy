@@ -10,7 +10,7 @@ class _05_HappySpec extends Specification {
     void 'draw a smiley'() {
         when:
             File excelFile = TestFiles.newTestFile("test05.xlsx")
-            ExcelExporter.drawSmiley().writeTo(excelFile)
+            ExcelIntegration.drawSmiley().writeTo(excelFile)
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)
