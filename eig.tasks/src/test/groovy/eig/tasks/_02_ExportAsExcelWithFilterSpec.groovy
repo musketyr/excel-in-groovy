@@ -9,6 +9,7 @@ import org.modelcatalogue.spreadsheet.query.api.SpreadsheetCriteria
 import org.modelcatalogue.spreadsheet.query.poi.PoiSpreadsheetCriteria
 import spock.lang.Specification
 
+// TODO: merged into one task 01
 class _02_ExportAsExcelWithFilterSpec extends Specification {
 
     void 'export to excel with filter'() {
