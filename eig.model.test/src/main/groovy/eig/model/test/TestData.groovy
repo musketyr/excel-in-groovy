@@ -93,6 +93,10 @@ class TestData {
         TestData.getResourceAsStream('testdata.xlsx')
     }
 
+    static InputStream getTestOrderStream() {
+        TestData.getResourceAsStream('testorder.xlsx')
+    }
+
     private static int readInt(String value) {
         Integer.valueOf(value, 10)
     }
