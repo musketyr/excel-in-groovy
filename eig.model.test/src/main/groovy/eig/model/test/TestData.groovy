@@ -97,6 +97,10 @@ class TestData {
         TestData.getResourceAsStream('testorder.xlsx')
     }
 
+    static InputStream getTestServiceHoursStream() {
+        TestData.getResourceAsStream('servicehours.xlsx')
+    }
+
     private static int readInt(String value) {
         Integer.valueOf(value, 10)
     }
@@ -116,7 +120,6 @@ class TestData {
     private static Deal readDeal(String value) {
         Deal.valueOf(value.toUpperCase().replaceAll(/\s/, '_'))
     }
-
 
 
 }
