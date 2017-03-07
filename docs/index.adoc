@@ -13,7 +13,6 @@ to write and read OfficeOpenXML Documents (XSLX). Some of the topics needed for 
 To get started you need to have installed following:
 
  * Java Development Kit 8
- * Git
  * OfficeOpenXML Documents (XSLX) compatible application
 
 IMPORTANT: Although you should be able to display the resulting XLSX file in any compatible application
@@ -26,11 +25,7 @@ You can use IDE of your choice but https://www.jetbrains.com/idea/[IntelliJ IDEA
 Gradle and Groovy integration even in the free Community version and it will be used in live coding sessions during
 the workshop.
 
-To get started clone the repository locally:
-
-----
-git clone https://github.com/musketyr/excel-in-groovy.git
-----
+*To get started download link:archives/excel-in-groovy.zip[exercise project archive file] and unzip it*.
 
 
 === Business Model

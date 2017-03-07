@@ -28,6 +28,24 @@ subprojects {
     }
 }
 
+task exercisesArchive(type: Zip) {
+    archiveName = 'excel-in-groovy.zip'
+    from('.') {
+        exclude '.git'
+        exclude '.idea'
+        exclude '.gradle'
+        exclude 'build'
+        exclude 'docs'
+        exclude '.gitignore'
+        exclude 'README.adoc'
+    }
+}
+
+task copyExercisesArchive(dependsOn: exercisesArchive, type: Copy) {
+    into "$asciidoctor.outputDir/html5/archives"
+    from exercisesArchive.archivePath
+}
+
 // asciidoctor publishing
 asciidoctor {
 
@@ -62,8 +80,8 @@ githubPages {
     }
 }
 
+asciidoctor.dependsOn copyExercisesArchive
 publishGhPages.dependsOn asciidoctor
-
 
 
 
