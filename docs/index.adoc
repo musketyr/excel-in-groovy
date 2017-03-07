@@ -4,7 +4,9 @@ Vladimír Oraný <https://github.com/musketyr[icon:github[] @musketyr]>
 == Getting Started
 
 This workshop will learn you how to use http://metadataconsulting.github.io/spreadsheet-builder/[Groovy Spreadsheet Builder] API
-to write and read OfficeOpenXML Documents (XSLX).
+to write and read OfficeOpenXML Documents (XSLX). Some of the topics needed for finishing the exercises are written directly in this document
+ but you can always follow http://metadataconsulting.github.io/spreadsheet-builder/[Groovy Spreadsheet Documentation] for the ones not covered
+ or for deeper insight.
 
 === Software Requirements
 
