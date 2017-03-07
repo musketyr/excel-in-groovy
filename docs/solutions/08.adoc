@@ -1,0 +1,52 @@
+= LADS Challenge Reference Solution
+
+== Solution
+
+This is reference solution to the LADS Challenge exercise.
+
+[source,groovy]
+----
+SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forStream(stream)
+
+Row departuresFromAirportHeadline = criteria.query {
+    sheet {
+        row {
+            cell {
+                value 'Departures from the Airport'
+}   }   }   }.row
+
+Row workingDaysHeadline = criteria.query {
+    sheet {
+        row (range(departuresFromAirportHeadline.number + 1, Integer.MAX_VALUE)){
+            cell {
+                value 'Working Days'
+}   }   }   }.row
+
+Row weekendsHeadline = criteria.query {
+    sheet {
+        row (range(workingDaysHeadline.number + 1, Integer.MAX_VALUE)){
+            cell {
+                value 'Weekends and Holidays'
+}   }   }   }.row
+
+Row hoursRow = criteria.query {
+    sheet {
+        row (range(workingDaysHeadline.number + 1, weekendsHeadline.number)){
+            cell {
+                value 'Hour'
+}   }   }   }.row
+
+ImmutableSet.Builder<LocalTime> times = ImmutableSet.builder()
+
+for (Cell hour in hoursRow.cells.tail()) {
+    Cell minutes = hour.bellow
+    while (minutes && minutes.value != null && minutes.value instanceof Number && minutes.row.number < weekendsHeadline.number) {
+        times.add(LocalTime.of(hour.read(Integer), minutes.read(Integer)))
+        minutes = minutes.bellow
+    }
+}
+
+return times.build()
+----
+
+link:../index.html[Back to Exercises]

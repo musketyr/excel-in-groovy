@@ -6,12 +6,12 @@ import org.modelcatalogue.spreadsheet.query.api.SpreadsheetCriteria
 import org.modelcatalogue.spreadsheet.query.poi.PoiSpreadsheetCriteria
 import spock.lang.Specification
 
-class _02_ExportAsWellFormattedExcelSpec extends Specification {
+class _02_ExecutiveReportSpec extends Specification {
 
     void 'export well formatted excel'() {
         when:
             File excelFile = TestFiles.newTestFile('test02.xlsx')
-            ExcelIntegration.buildWellFormattedSpreadsheet(TestData.orders).writeTo(excelFile)
+            ExcelIntegration.buildExecutiveReport(TestData.orders).writeTo(excelFile)
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)

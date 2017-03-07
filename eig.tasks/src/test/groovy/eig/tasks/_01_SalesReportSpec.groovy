@@ -8,12 +8,12 @@ import org.modelcatalogue.spreadsheet.query.api.SpreadsheetCriteria
 import org.modelcatalogue.spreadsheet.query.poi.PoiSpreadsheetCriteria
 import spock.lang.Specification
 
-class _01_ExportAsExcelWithFilterSpec extends Specification {
+class _01_SalesReportSpec extends Specification {
 
     void 'export to excel with filter'() {
         when:
             File excelFile = TestFiles.newTestFile('test01.xlsx')
-            ExcelIntegration.buildSpreadsheetWithFilter(TestData.orders).writeTo(excelFile)
+            ExcelIntegration.buildSalesReport(TestData.orders).writeTo(excelFile)
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)

@@ -1,0 +1,447 @@
+= Order Reference Solution
+
+== Solution
+
+This is reference solution to the Order exercise.
+
+You can see the generated file link:test03-EMEA.xlsx[for EMEA region] and link:test03-NA.xlsx[for the rest of the world].
+
+
+Solution for the Order exercise required more classes to implement. The `buildOrder` method content follows:
+
+[source,groovy]
+----
+SpreadsheetBuilder builder = PoiSpreadsheetBuilder.INSTANCE
+
+return builder.build {
+
+    if (order.customer.territory == 'EMEA') {
+        apply EMEAStyles.INSTANCE
+    } else {
+        apply GeneralStyles.INSTANCE
+    }
+
+    sheet('Order') {
+        page {
+            paper a4
+            orientation portrait
+        }
+        row {
+            style 'border-thick-top'
+            cell {
+                width 8 cm
+                style 'border-thick-left'
+                height 1
+            }
+            cell {
+                width 2 cm
+            }
+            cell {
+                width 2 cm
+            }
+            cell {
+                width 1 cm
+            }
+            cell {
+                width 3 cm
+                style 'border-thick-right'
+            }
+        }
+        row {
+            cell {
+                value "Order #${order.number}"
+                colspan 5
+                styles 'border-thick-left', 'border-thick-right', 'border-thick-bottom', 'headline'
+            }
+        }
+        row {
+            styles 'border-thin-bottom', 'item-headers'
+            cell {
+                value 'Supplier'
+                styles 'border-thick-left', 'border-thin-right'
+            }
+            cell {
+                value 'Consumer'
+                colspan 4
+                style 'border-thick-right'
+            }
+        }
+        row {
+            styles 'address-line'
+            cell {
+                value 'ACME Corp.'
+                styles 'border-thick-left', 'border-thin-right'
+            }
+            cell {
+                value order.customer.companyName
+                colspan 4
+                style 'border-thick-right'
+            }
+        }
+        row {
+            styles 'address-line'
+            cell {
+                value "Groovy Guru"
+                styles 'border-thick-left', 'border-thin-right'
+            }
+            cell {
+                value "$order.customer.firstName $order.customer.lastName"
+                colspan 4
+                style 'border-thick-right'
+            }
+        }
+        row {
+            styles 'address-line'
+            cell {
+                value '123 Fake Street'
+                styles 'border-thick-left', 'border-thin-right'
+            }
+            cell {
+                value order.customer.addressLine1
+                colspan 4
+                style 'border-thick-right'
+            }
+        }
+        row {
+            styles 'address-line'
+            cell {
+                styles 'border-thick-left', 'border-thin-right'
+            }
+            cell {
+                value order.customer.addressLine2
+                colspan 4
+                style 'border-thick-right'
+            }
+        }
+        row {
+            styles 'address-line'
+            cell {
+                value '123 56 Groovyton, GR'
+                styles 'border-thick-left', 'border-thin-right'
+            }
+            cell {
+                value(order.customer.postalCode + ' ' + (order.customer.state ? "$order.customer.city, $order.customer.state" : order.customer.city))
+                colspan 4
+                style 'border-thick-right'
+            }
+        }
+        row {
+            styles 'address-line'
+            cell {
+                value 'USA'
+                styles 'border-thick-left', 'border-thin-right'
+            }
+            cell {
+                value order.customer.country
+                colspan 4
+                style 'border-thick-right'
+            }
+        }
+        row {
+            styles 'address-line'
+            cell {
+                value 'tel.: 555-123-456'
+                styles 'border-thick-left', 'border-thin-right'
+            }
+            cell {
+                value "tel.: $order.customer.phone"
+                colspan 4
+                style 'border-thick-right'
+            }
+        }
+        row {
+            cell {
+                value 'Items Ordered'
+                styles 'border-thick-left', 'border-thick-right', 'border-thick-top', 'border-thick-bottom', 'subheadline'
+                colspan 5
+            }
+        }
+        row {
+            styles 'border-thin-bottom', 'item-headers'
+            cell {
+                value 'Product'
+                style 'border-thick-left'
+            }
+            cell {
+                value 'SKU'
+            }
+            cell {
+                value 'Price'
+                style 'pull-right'
+            }
+            cell {
+                value 'Qty'
+                style 'pull-right'
+            }
+            cell {
+                value 'Total'
+                styles 'border-thick-right', 'pull-right'
+            }
+        }
+        for (OrderLine line in order.lines) {
+            row {
+                cell {
+                    value line.product.line
+                    styles 'border-thick-left', 'small'
+                }
+                cell {
+                    value line.product.code
+                    style 'small'
+                }
+                cell {
+                    value line.price
+                    name "price$line.line"
+                    styles 'money', 'small'
+                }
+                cell {
+                    value line.quantity
+                    name "qty$line.line"
+                    style 'small'
+                }
+                cell {
+                    formula "#{price$line.line} * #{qty$line.line}"
+                    name "total$line.line"
+                    styles 'border-thick-right', 'money', 'small'
+                }
+            }
+        }
+        row {
+            style 'total'
+            cell {
+                value 'Total'
+                styles 'border-thick-left', 'border-thick-top', 'border-thick-bottom'
+            }
+            cell {
+                value ''
+                styles 'border-thick-top', 'border-thick-bottom'
+            }
+            cell {
+                value ''
+                styles 'border-thick-top', 'border-thick-bottom'
+            }
+            cell {
+                value ''
+                styles 'border-thick-top', 'border-thick-bottom'
+            }
+            cell {
+                formula "SUM(#{total1}:#{total${order.lines.size()}})"
+                styles 'border-thick-bottom', 'border-thick-left', 'border-thick-right', 'border-thick-top', 'money'
+            }
+        }
+    }
+}
+
+----
+
+
+You also require to declare the `EMEAStyles.groovy` stylesheet:
+
+[source,groovy]
+----
+enum EMEAStyles implements Stylesheet {
+
+    INSTANCE
+
+    @Override
+    void declareStyles(CanDefineStyle stylable) {
+        stylable.with {
+            style 'border-thick-top', {
+                border top, {
+                    style getDouble()
+                    color black
+                }
+            }
+            style 'border-thick-right', {
+                border right, {
+                    style getDouble()
+                    color black
+                }
+            }
+            style 'border-thick-left', {
+                border left, {
+                    style getDouble()
+                    color black
+                }
+            }
+            style 'border-thick-bottom', {
+                border bottom, {
+                    style getDouble()
+                    color black
+                }
+            }
+            style 'border-thin-bottom', {
+                border bottom, {
+                    style dashed
+                    color black
+                }
+            }
+            style 'border-thin-bottom', {
+                border bottom, {
+                    style dashed
+                    color black
+                }
+            }
+            style 'border-thin-right', {
+                border right, {
+                    style dashed
+                    color black
+                }
+            }
+
+            style 'pull-right', {
+                align center right
+            }
+
+            style 'headline', {
+                font {
+                    size 26
+                }
+                align center center
+            }
+
+            style 'total', {
+                font {
+                    make bold
+                }
+            }
+
+
+            style 'item-headers', {
+                font {
+                    make bold
+                }
+            }
+
+            style 'subheadline', {
+                font {
+                    size 16
+                    make bold
+                }
+                align center center
+            }
+
+            style 'address-line', {
+                indent 2
+            }
+
+            style 'money', {
+                format '\\€ ### ###.00'
+            }
+
+            style 'small', {
+                font {
+                    size 10
+                }
+            }
+        }
+    }
+}
+----
+
+You also require to declare the `GeneralStyles.groovy` stylesheet:
+
+[source,groovy]
+----
+enum GeneralStyles implements Stylesheet {
+
+    INSTANCE
+
+    @Override
+    void declareStyles(CanDefineStyle stylable) {
+        stylable.with {
+            style 'border-thick-top', {
+                border top, {
+                    style thick
+                    color black
+                }
+            }
+            style 'border-thick-right', {
+                border right, {
+                    style thick
+                    color black
+                }
+            }
+            style 'border-thick-left', {
+                border left, {
+                    style thick
+                    color black
+                }
+            }
+            style 'border-thick-bottom', {
+                border bottom, {
+                    style thick
+                    color black
+                }
+            }
+            style 'border-thin-bottom', {
+                border bottom, {
+                    style thin
+                    color black
+                }
+            }
+            style 'border-thin-bottom', {
+                border bottom, {
+                    style thin
+                    color black
+                }
+            }
+            style 'border-thin-right', {
+                border right, {
+                    style thin
+                    color black
+                }
+            }
+
+            style 'pull-right', {
+                align center right
+            }
+
+            style 'headline', {
+                font {
+                    size 26
+                }
+                align center center
+            }
+
+            style 'total', {
+                font {
+                    make bold
+                }
+            }
+
+
+            style 'item-headers', {
+                font {
+                    make bold
+                }
+            }
+
+            style 'subheadline', {
+                font {
+                    size 16
+                    make bold
+                }
+                align center center
+            }
+
+            style 'address-line', {
+                indent 2
+            }
+
+            style 'money', {
+                format '\\E\\U\\R ### ### ###.00'
+            }
+
+            style 'small', {
+                font {
+                    size 10
+                }
+            }
+        }
+    }
+}
+----
+
+
+
+link:../index.html[Back to Exercises]

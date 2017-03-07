@@ -1,0 +1,273 @@
+= Executive Report Reference Solution
+
+== Solution
+
+This is reference solution to the Executive Report exercise.
+
+You can see the generated file link:test02.xlsx[here].
+
+[source,groovy]
+----
+SpreadsheetBuilder builder = PoiSpreadsheetBuilder.INSTANCE
+
+return builder.build {
+    style('header') {
+        font {
+            make bold
+            size 16
+        }
+        align center
+    }
+    style('centered') {
+        align center center
+    }
+    style('date') {
+        base 'centered'
+        format 'd/m/yy h:mm'
+    }
+    style('EUR') {
+        format '€ #.00'
+    }
+    style('cancelled') {
+        foreground lightYellow
+        fill solidForeground
+    }
+    style('in_process') {
+        foreground lightSkyBlue
+        fill solidForeground
+    }
+    style('on_hold') {
+        foreground lightGray
+        fill solidForeground
+    }
+    style('resolved') {
+        foreground lightGreen
+        fill solidForeground
+    }
+    style('shipped') {
+        // default
+    }
+    style('disputed') {
+        foreground lightPink
+        fill solidForeground
+    }
+    sheet('Data') {
+        freeze 1, 1
+        row {
+            style 'header'
+            cell {
+                value 'Order Number'
+                width 25
+            }
+            cell {
+                value 'Quantity'
+                width 25
+            }
+            cell {
+                value 'Price per Item'
+                width 25
+            }
+            cell {
+                value 'Order Line Number'
+                width 25
+            }
+            cell {
+                value 'Sales'
+                width 25
+            }
+            cell {
+                value 'Order Date'
+                width 25
+            }
+            cell {
+                value 'Status'
+                width 25
+            }
+            cell {
+                value 'Product Line'
+                width 25
+            }
+            cell {
+                value 'MSRP'
+                width 25
+            }
+            cell {
+                value 'Product Code'
+                width 25
+            }
+            cell {
+                value 'Customer Name'
+                width 25
+            }
+            cell {
+                value 'Phone'
+                width 25
+            }
+            cell {
+                value 'Address Line 1'
+                width 50
+            }
+            cell {
+                value 'Address Line 2'
+                width 50
+            }
+            cell {
+                value 'City'
+                width 25
+            }
+            cell {
+                value 'State'
+                width 25
+            }
+            cell {
+                value 'Postal Code'
+                width 25
+            }
+            cell {
+                value 'Country'
+                width 25
+            }
+            cell {
+                value 'Territory'
+                width 25
+            }
+            cell {
+                value 'Last Name'
+                width 25
+            }
+            cell {
+                value 'First Name'
+                width 25
+            }
+            cell {
+                value 'Deal'
+            }
+        }
+        for (Order order in orders.values()) {
+            OrderLine first = order.lines.first()
+            row {
+                style order.status.toString().toLowerCase()
+                cell {
+                    value order.number
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell first.quantity
+                cell {
+                    value first.price
+                    style 'EUR'
+                }
+                cell first.line
+                cell {
+                    value first.sales
+                    style 'EUR'
+                }
+                cell {
+                    value Date.from(order.date.toInstant(ZoneOffset.of('+1')))
+                    rowspan order.lines.size()
+                    style 'date'
+
+                }
+                cell {
+                    value order.status.toString()
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell first.product.line
+                cell {
+                    value first.product.msrp
+                    style 'EUR'
+                }
+                cell first.product.code
+                cell {
+                    value order.customer.companyName
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.phone
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.addressLine1
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.addressLine2
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.city
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.state
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.postalCode
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.country
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.territory
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.lastName
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell {
+                    value order.customer.firstName
+                    rowspan order.lines.size()
+                    style 'centered'
+                }
+                cell first.deal.toString()
+            }
+            for (OrderLine line in order.lines.tail()) {
+                row {
+                    style order.status.toString().toLowerCase()
+                    cell('B') {
+                        value line.quantity
+                    }
+                    cell {
+                        value line.price
+                        style 'EUR'
+                    }
+                    cell line.line
+                    cell {
+                        value line.sales
+                        style 'EUR'
+                    }
+                    cell('H') {
+                        value line.product.line
+                    }
+                    cell {
+                        value line.product.msrp
+                        style 'EUR'
+                    }
+                    cell line.product.code
+                    cell('V') {
+                        value line.deal.toString()
+                    }
+                }
+            }
+        }
+    }
+}
+
+----
+
+link:../index.html[Back to Exercises]

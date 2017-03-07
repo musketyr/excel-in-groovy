@@ -1,0 +1,87 @@
+= Sales Charts Reference Solution
+
+== Solution
+
+This is reference solution to the Sales Charts exercise.
+
+You can see the generated file link:test04.xlsx[here].
+
+The key point to generate the file properly is to have the template spreadsheet first. You can get one link:test04.tpl.xlsx[here].
+Place the file into `excel-in-groovy/eig.tasks/src/main/resources/eig/tasks/` directory so it can be used
+from `ExcelImporter` class easily.
+
+You can take a look on how named ranges are defined in the template file:
+
+----
+ProductsNamesRange: OFFSET(Products!$A$2,0,0,Products!$C$2,1)
+ProductsSalesRange: OFFSET(Products!$B$2,0,0,Products!$C$2,1)
+TerritoryNamesRange: OFFSET(Territory!$A$2,0,0,Territory!$C$2,1)
+TerritorySalesRange: OFFSET(Territory!$B$2,0,0,Territory!$C$2,1)
+----
+
+Labels of the _Territory_ chart uses `TerritoryNamesRange` and values uses `TerritorySalesRange` range.
+
+Labels of the _Products_ chart uses `ProductsNamesRange` and values uses `ProductsSalesRange` range.
+
+
+Filling the data in is pretty simple task:
+
+[source,groovy]
+----
+Map<String, BigDecimal> territory = orders.inject(new TreeMap<String, BigDecimal>().withDefault { BigDecimal.ZERO }) { Map<String, BigDecimal> map, Integer number, Order order ->
+    for (OrderLine line in order.lines) {
+        map[order.customer.territory] = map[order.customer.territory] + line.sales
+    }
+    map
+}
+
+Map<String, BigDecimal> products = orders.inject(new TreeMap<String, BigDecimal>().withDefault { BigDecimal.ZERO }) { Map<String, BigDecimal> map, Integer number, Order order ->
+    for (OrderLine line in order.lines) {
+        map[line.product.line] = map[line.product.line] + line.sales
+    }
+    map
+}
+
+PoiSpreadsheetBuilder.INSTANCE.build(ExcelIntegration.getResourceAsStream('test04.tpl.xlsx')) {
+    sheet('Territory') {
+        row {
+            cell 'Territory'
+            cell 'Sales'
+            cell 'Count'
+        }
+        for (Map.Entry<String, BigDecimal> entry in territory.entrySet()) {
+            row {
+                cell entry.key
+                cell entry.value
+            }
+        }
+        row(2) {
+            cell('C') {
+                value territory.size()
+            }
+        }
+    }
+    sheet('Products') {
+        row {
+            cell 'Product'
+            cell 'Sales'
+            cell 'Count'
+        }
+        for (Map.Entry<String, BigDecimal> entry in products.entrySet()) {
+            row {
+                cell entry.key
+                cell entry.value
+            }
+        }
+        row(2) {
+            cell('C') {
+                value products.size()
+            }
+        }
+    }
+}
+----
+
+It is important to fill the count of the products and territories so the `OFFSET` function can take these into account.
+
+link:../index.html[Back to Exercises]

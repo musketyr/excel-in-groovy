@@ -1,0 +1,43 @@
+= Order Received Reference Solution
+
+== Solution
+
+This is reference solution to the Order Received exercise.
+
+[source,groovy]
+----
+SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forStream(stream)
+
+Row orderItemsHeaders = criteria.query {
+    sheet {
+        row {
+            cell {
+                value 'Items Ordered'
+}   }   }   }.row.bellow
+
+Row totalRow = criteria.query {
+    sheet {
+        row {
+            cell('A') {
+                value 'Total'
+                style {
+                    font {
+                        make bold
+}   }   }   }   }   }.row
+
+Collection<Row> itemsRows = criteria.query {
+    sheet {
+        row(range(orderItemsHeaders.number + 1, totalRow.number - 1))
+}   }.rows
+
+ImmutableMap.Builder<String, Integer> products = ImmutableMap.builder()
+
+for (Row row in itemsRows) {
+    DataRow dataRow = DataRow.create(row, orderItemsHeaders)
+    products.put(dataRow['SKU'].read(String), dataRow['Qty'].read(Integer))
+}
+
+return products.build()
+----
+
+link:../index.html[Back to Exercises]

@@ -1,0 +1,159 @@
+= Sales Report Reference Solution
+
+== Solution
+
+This is reference solution to the Sales Report exercise.
+
+You can see the generated file link:test01.xlsx[here].
+
+[source,groovy]
+----
+SpreadsheetBuilder builder = PoiSpreadsheetBuilder.INSTANCE
+
+return builder.build {
+    sheet('Data') {
+        filter auto
+        freeze('A', 1)
+        row {
+            cell {
+                value 'Order Number'
+                width auto
+            }
+            cell {
+                value 'Quantity'
+                width auto
+            }
+            cell {
+                value 'Price per Item'
+                width auto
+            }
+            cell {
+                value 'Order Line Number'
+                width auto
+            }
+            cell {
+                value 'Sales'
+                width auto
+            }
+            cell {
+                value 'Order Date'
+                width auto
+            }
+            cell {
+                value 'Status'
+                width auto
+            }
+            cell {
+                value 'Product Line'
+                width auto
+            }
+            cell {
+                value 'MSRP'
+                width auto
+            }
+            cell {
+                value 'Product Code'
+                width auto
+            }
+            cell {
+                value 'Customer Name'
+                width auto
+            }
+            cell {
+                value 'Phone'
+                width auto
+            }
+            cell {
+                value 'Address Line 1'
+                width auto
+            }
+            cell {
+                value 'Address Line 2'
+                width auto
+            }
+            cell {
+                value 'City'
+                width auto
+            }
+            cell {
+                value 'State'
+                width auto
+            }
+            cell {
+                value 'Postal Code'
+                width auto
+            }
+            cell {
+                value 'Country'
+                width auto
+            }
+            cell {
+                value 'Territory'
+                width auto
+            }
+            cell {
+                value 'Last Name'
+                width auto
+            }
+            cell {
+                value 'First Name'
+                width auto
+            }
+            cell {
+                value 'Deal'
+                width auto
+            }
+        }
+        for (Order order in orders.values()) {
+            for (OrderLine line in order.lines) {
+                row {
+                    cell order.number
+                    cell line.quantity
+                    cell {
+                        value line.price
+                        style {
+                            format '#.00'
+                        }
+                    }
+                    cell line.line
+                    cell {
+                        value line.sales
+                        style {
+                            format '#.00'
+                        }
+                    }
+                    cell {
+                        value Date.from(order.date.toInstant(ZoneOffset.of('+1')))
+                        style {
+                            format 'dd.mm.yyyy hh:mm'
+                        }
+                    }
+                    cell order.status.toString()
+                    cell line.product.line
+                    cell {
+                        value line.product.msrp
+                        style {
+                            format '#.00'
+                        }
+                    }
+                    cell line.product.code
+                    cell order.customer.companyName
+                    cell order.customer.phone
+                    cell order.customer.addressLine1
+                    cell order.customer.addressLine2
+                    cell order.customer.city
+                    cell order.customer.state
+                    cell order.customer.postalCode
+                    cell order.customer.country
+                    cell order.customer.territory
+                    cell order.customer.lastName
+                    cell order.customer.firstName
+                    cell line.deal.toString()
+                }
+            }
+        }
+    }
+}
+----
+
+link:../index.html[Back to Exercises]

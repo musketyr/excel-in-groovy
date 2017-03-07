@@ -1,0 +1,93 @@
+= Data Migration Reference Solution
+
+== Solution
+
+This is reference solution to the Data Migration exercise.
+
+[source,groovy]
+----
+SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forStream(inputStream)
+
+Integer orderNumberHeaderColumn = criteria.find {
+    sheet {
+        row {
+            cell {
+                value 'Order Number'
+}   }   }   }?.column
+
+Set<Number> orderNumbers = criteria.query {
+    sheet {
+        row(range(2, Integer.MAX_VALUE)) {
+            cell(orderNumberHeaderColumn)
+}   }   }.cells.collect { it.value } as Set<Number>
+
+
+Row headersRow = criteria.query {
+    sheet {
+        row(1) {
+}   }   }.row
+
+ImmutableList.Builder<Order> ordersBuilder = ImmutableList.builder()
+
+for (Number orderNumber in orderNumbers) {
+    Collection<Row> orderRows = criteria.query {
+        sheet {
+            row {
+                cell(orderNumberHeaderColumn) {
+                    value orderNumber
+    }   }   }   }.rows
+
+    DataRow firstDataRow = DataRow.create(orderRows.first(), headersRow)
+    Customer customer = new Customer(
+        firstDataRow['Customer Name']?.read(String),
+        firstDataRow['First Name']?.read(String),
+        firstDataRow['Last Name']?.read(String),
+        firstDataRow['Phone']?.read(String),
+        firstDataRow['Address Line 1']?.read(String),
+        firstDataRow['Address Line 2']?.read(String),
+        firstDataRow['City']?.read(String),
+        firstDataRow['Postal Code']?.read(String),
+        firstDataRow['State']?.read(String),
+        firstDataRow['Country']?.read(String),
+        firstDataRow['Territory']?.read(String)
+    )
+
+    OrderStatus status = OrderStatus.valueOf(firstDataRow['Status']?.read(String)?.toUpperCase())
+    LocalDateTime date = LocalDateTime.ofInstant(firstDataRow['Order Date']?.read(Date)?.toInstant(), ZoneOffset.of('+1'))
+
+    ImmutableList.Builder<OrderLine> linesBuilder = ImmutableList.builder()
+    for (Row orderLineRow in orderRows) {
+        DataRow dataRow = DataRow.create(orderLineRow, headersRow)
+        Integer line = dataRow['Order Line Number']?.read(Integer)
+        Integer qty = dataRow['Quantity']?.read(Integer)
+        BigDecimal price = dataRow['Price per Item']?.read(BigDecimal)
+        BigDecimal sales = dataRow['Sales']?.read(BigDecimal)
+        Deal deal = Deal.valueOf(dataRow['Deal']?.read(String)?.toUpperCase())
+        Product product = new Product(
+            dataRow['Product Line']?.read(String),
+            dataRow['Product Code']?.read(String),
+            dataRow['MSRP']?.read(BigDecimal)
+        )
+        linesBuilder.add(new OrderLine(
+            line,
+            qty,
+            price,
+            sales,
+            deal,
+            product
+        ))
+    }
+
+    ordersBuilder.add(new Order(
+        orderNumber as Integer,
+        status,
+        date,
+        customer,
+        linesBuilder.build()
+    ))
+}
+
+return ordersBuilder.build()
+----
+
+link:../index.html[Back to Exercises]

@@ -1,0 +1,631 @@
+= Excel in Groovy Workshop
+Vladimír Oraný <https://github.com/musketyr[icon:github[] @musketyr]>
+
+== Getting Started
+
+This workshop will learn you how to use http://metadataconsulting.github.io/spreadsheet-builder/[Groovy Spreadsheet Builder] API
+to write and read OfficeOpenXML Documents (XSLX).
+
+=== Software Requirements
+
+To get started you need to have installed following:
+
+ * Java Development Kit 8
+ * Git
+ * OfficeOpenXML Documents (XSLX) compatible application
+
+IMPORTANT: Although you should be able to display the resulting XLSX file in any compatible application
+the workshop exercises were so far only tested in Microsoft Excel.
+
+Project is built using https://gradle.org/[Gradle] build tool but it's using https://docs.gradle.org/current/userguide/gradle_wrapper.html[Gradle Wrapper]
+so you are not required to install it manually nor you don't have to be afraid of version clash.
+
+You can use IDE of your choice but https://www.jetbrains.com/idea/[IntelliJ IDEA] provides so far the best
+Gradle and Groovy integration even in the free Community version and it will be used in live coding sessions during
+the workshop.
+
+To get started clone the repository locally:
+
+----
+git clone https://github.com/musketyr/excel-in-groovy.git
+----
+
+
+=== Business Model
+
+In most of the exercises are using sample sales data from https://www.kaggle.com/kyanyoga/sample-sales-data.
+
+Inside the exercises, the data are represented using following type structure to mock existing application.
+
+image::https://yuml.me/22db088c[Business Model]
+
+Test data are stored locally in following CSV file:
+
+----
+excel-in-groovy/eig.model.test/src/main/resources/eig/model/test/testdata.csv
+----
+
+=== Code Structure
+
+----
+├── eig.model
+│   └── src
+│       └── main
+│           └── groovy
+│               └── eig
+│                   └── model # <1>
+│                       ├── Customer.groovy
+│                       ├── Deal.groovy
+│                       ├── Order.groovy
+│                       ├── OrderLine.groovy
+│                       ├── OrderStatus.groovy
+│                       └── Product.groovy
+├── eig.model.test
+│   └── src
+│       └── main
+│           ├── groovy
+│           │   └── eig
+│           │       └── model
+│           │           └── test # <2>
+│           │               ├── TestData.groovy
+│           │               └── TestFiles.groovy
+│           └── resources
+│               └── eig
+│                   └── model
+│                       └── test # <3>
+│                           ├── servicehours.xlsx
+│                           ├── testdata.csv
+│                           ├── testdata.xlsx
+│                           └── testorder.xlsx
+└── eig.tasks
+    └── src
+        ├── main
+        │   └── groovy
+        │       └── eig
+        │           └── tasks
+        │               └── ExcelIntegration.groovy # <4>
+        └── test
+            └── groovy
+                └── eig
+                    └── tasks # <5>
+                        ├── _01_SalesReportSpec.groovy
+                        ├── _02_ExecutiveReportSpec.groovy
+                        ├── _03_ExportOrderAsExcelSpec.groovy
+                        ├── _04_FillDataSpec.groovy
+                        ├── _05_HappySpec.groovy
+                        ├── _06_ImportOrdersSpec.groovy
+                        ├── _07_ImportProductsSpec.groovy
+                        └── _08_ImportServiceHoursSpec.groovy
+----
+
+<1> Business Model
+<2> Test Utilities
+<3> Test Data
+<4> Implementation class
+<5> Spock Specifications
+
+Each exercise is represented as http://spockframework.org/spock/docs/1.0/index.html[Spock] specification.
+Each of the specification tests one method in `ExcelIntegration` class. This is where you are going to write
+your own code.
+
+== Writing Spreadsheets
+
+First 5 exercises will teach you how to write rich XLSX files.
+
+=== 1. Sales Report
+
+.Sales Report
+****
+Sale manager wants to see all the orders in spreadsheet so she can easily filter particular customers and products.
+Export all the orders in a spreadsheet, add automatic filter and freeze the first row and column so it's easily navigable.
+Make sure the texts displayed fit into the colums and numbers and dates are formatted properly.
+****
+
+Implement method `buildSalesReport` in `ExcelIntegration` class to make `_01_SalesReportSpec` passing.
+See link:solutions/test01.xlsx[existing file] for reference.
+
+==== Builder Basics
+
+Spreadsheet builder follows the logical nested structure of the spreadsheet where
+there is several sheets in the workbook, each of the sheets having several rows and each of the rows
+containing several cells. The row and column indicies are held internally so there is no need to address
+rows and cells by their indicies unless you want to skip some rows or columns.
+
+[source,groovy]
+----
+import eig.model.Order
+import org.modelcatalogue.spreadsheet.builder.api.SpreadsheetBuilder
+import org.modelcatalogue.spreadsheet.builder.api.SpreadsheetDefinition
+import org.modelcatalogue.spreadsheet.builder.poi.PoiSpreadsheetBuilder
+
+class ExcelIntegration {
+    static SpreadsheetDefinition buildSalesReport(Map<Integer, Order> orders) {
+        SpreadsheetBuilder builder = PoiSpreadsheetBuilder.INSTANCE         // <1>
+        return builder.build {                                              // <2>
+            sheet('Data') {                                                 // <3>
+                filter auto                                                 // <4>
+                freeze('A', 1)                                              // <5>
+                row {                                                       // <6>
+                    cell {                                                  // <7>
+                        value 'Order Number'                                // <8>
+                        width auto                                          // <9>
+                    }
+                    // ...
+                }
+                // ...
+            }
+        }
+    }
+    // ...
+}
+----
+
+<1> Obtaining an instance of `SpreadsheetBuilder` based on Apache POI
+<2> Building new spreadsheet and returning `SpreadsheetDefinition` which can be later written into file or stream.
+<3> Creating new sheet called _Data_
+<4> Enabling the automatic filter for all the data in the current sheet
+<5> Freezing the first row and the column _A_
+<6> Creating new row
+<7> Creating new cell
+<8> Assigning _Order Number_ string into the cell
+<9> Letting the column to fit into the width of the longest text present in the column
+
+==== Formatting Values
+
+Format can be specified to any cell within the style definition.
+See http://metadataconsulting.github.io/spreadsheet-builder/#_data_formats[the data formats section of the documentation] for more information on topic.
+
+[source,groovy]
+----
+cell {
+    value line.sales
+    style {
+        format '#.00'                                                       // <1>
+    }
+}
+cell {
+    value Date.from(order.date.toInstant(ZoneOffset.of('+1')))              // <2>
+    style {
+        format 'dd.mm.yyyy hh:mm'                                           // <3>
+    }
+}
+----
+
+<1> Fixing the number of digits of the sales to two digits after the decimal point
+<2> Converting the Java 8 `LocalDateTime` to `Date`
+<3> Printing the date in given format _day.month.year hour:minute_
+
+
+
+==== Solution
+
+You can verify your solution with the reference one link:solutions/01.html[here].
+
+
+=== 2. Executive Report
+
+.Executive Report
+****
+Executive officer wants to review states of all orders. Export all the orders to the spreadsheet and highlight every
+order which hasn't been shipped yet. For example orders with status _resolved_ should be highlighted with _light green_ color.
+Don't repeat the values common to whole order but merge the cells instead.
+Display the prices with two fixed digits after the decimal point and prefix them with `€` sign. Render the dates properly.
+The headlines should be centered, bold and they should have been written using bigger font as rest of the data.
+
+****
+
+Implement method `buildExecutiveReport` in `ExcelIntegration` class to make `_02_ExecutiveReportSpec` passing.
+See link:solutions/test02.xlsx[existing file] for reference.
+
+==== Merging Cells
+
+You can define `colspan` and `rowspan` for every cell. Using `colspan` will also shift he next column pointer so
+you will automatically continue after the merged cells. On the other hand `rowspan` will not change the inner next row
+index so you will continue on the row bellow current one. This fits most of the use cases where the columns
+are known and data are entered into rows dynamically.
+
+[source,groovy]
+----
+row {                                                                       // <1>
+    cell {
+        value "Grouped"
+        rowspan 5                                                           // <2>
+        colspan 2                                                           // <3>
+    }
+    cell 'Next Cell'                                                        // <4>
+}
+row {                                                                       // <5>
+    cell('C') {                                                             // <6>
+        value 'Render this under the "Next Cell"'
+    }
+}
+----
+
+<1> Create new row `1`
+<2> Set the `rowspan` of the cell - the cell will render through the rows `1` to `5`
+<3> Set the `colspan` of the cell - the cell will render through the columns `A` and `B`
+<4> Creates new cell - the cell will be automatically placed into column `C`
+<5> Creates new row `2` - no rows are skipped
+<6> Creates new cell in column `C` to not to collide with the merged cell `A1`
+
+==== Named Styles
+
+There is limited number of styles which can be declared within the spreadsheet. For files containing
+only couple of cell this is not a problem but if you have thousands of rows you can reach the limits easily.
+It is a good practise to use named styles instead. Named styles are defined in the top level of the builder
+code and then can be applied to either whole row or a single cell.
+
+See http://metadataconsulting.github.io/spreadsheet-builder/#_styles[the data formats section of the documentation] for more information on topic.
+
+[source,groovy]
+----
+builder.build {
+    style('light-green') {                                                  // <1>
+        foreground lightGreen                                               // <2>
+    }
+
+    style('dollar') {
+        format '$ #.00'
+    }
+
+    style('header') {
+        font {                                                              // <3>
+            make bold
+            size 72
+        }
+    }
+    style('top-left') {
+        align top left                                                      // <4>
+    }
+
+    sheet {
+        row {
+            style 'light-green'                                             // <5>
+            cell {
+                value 3.2
+                style 'dollar'                                              // <6>
+            }
+        }
+    }
+}
+----
+
+<1> Declaring the style `light-green`
+<2> Setting the foreground color of the cell (solid fill is applied automatically)
+<3> Declaring bold font with size of 72 points
+<4> Aligning cell content to top left corner
+<5> Using the named style `light-green` for whole row
+<6> Using the names style `dollar` for single row
+
+==== Solution
+
+You can verify your solution with the reference one link:solutions/02.html[here].
+
+=== 3. Order
+
+.Order
+****
+Shipping department needs to print an order to each package. Export single order to spreadsheet so it can
+be printed to A4 paper in portrait orientation. Use formulas whenever possible instead of computed
+values so the order can be updated manually if needed (i.g. there are not enought items on stock). For _EMEA_
+territory print the currency values with _€_ sign and make the outer border double and inner dashed. For the rest of the
+world print _EUR_ instead and make the border thick and thin respectively.
+
+****
+
+Implement method `buildOrder` in `ExcelIntegration` class to make `_03_ExportOrderAsExcelSpec` passing.
+See link:solutions/test03-EMEA.xlsx[existing file for EMEA region] and link:solutions/test03-NA.xlsx[the rest of the world] for reference.
+
+==== Page Settings
+
+Each sheet can declare the paper size and orientation:
+
+[source,groovy]
+----
+sheet {
+    page {
+        paper a5                                                            <1>
+        orientation landscape                                               <2>
+    }
+}
+----
+
+<1> Set the paper size to A5
+<2> Set the orientation to landscape
+
+==== Stylesheets
+
+You can externalize the style definition to separate class so it can be swap easily.
+
+[source,groovy]
+----
+enum SpanishStyles implements Stylesheet {                                  // <1>
+
+    INSTANCE
+
+    @Override void declareStyles(CanDefineStyle stylable) {
+        stylable.with {                                                     // <2>
+            style 'border-thick-top', {
+                border top, {
+                    style thick
+                    color black
+                }
+            }
+        }
+    }
+
+}
+----
+
+<1> To create a stylesheet, implement `Stylesheet` interface (you can create `enum` to make it singleton)
+<2> You usually declare styles within the `with` block so you don't have to repeat `stylable.` calls
+
+Then you can apply the styles on top level of the builder code:
+
+[source,groovy]
+----
+builder.build {
+    apply SpanishStyles.INSTANCE                                            <1>
+}
+----
+
+<1> Apply particular stylesheet on current spreadsheet (this usually happens withing `if-else` block
+
+==== Named Cells and Formulas
+
+You can declare names for cells so you can later refer them in formulas more easily.
+
+[source,groovy]
+----
+cell {
+    value line.price
+    name "price_01"                                                         <1>
+}
+cell {
+    value line.quantity
+    name "qty_01"
+}
+cell {
+    formula "#{price_01 * #{qty_01}"                                        <2>
+    name "total_01"
+}
+----
+
+<1> Declare name of the cell which needs to be unique within the whole spreadsheet
+<2> Use the declared name in the formula with `#{name}`
+
+==== Solution
+
+You can verify your solution with the reference one link:solutions/03.html[here].
+
+=== 4. Sales Charts
+
+.Sales Charts
+****
+Create two charts displaying cumulated sales by territory and by product line.
+****
+
+Implement method `fillData` in `ExcelIntegration` class to make `_04_FillDataSpec` passing.
+See link:solutions/test04.xlsx[existing file] for reference.
+
+==== Beyond the Builder (Charts etc.)
+
+Apache POI as current underlying implementation is not capable of working with charts in spreadsheet files thus
+the only way how to generate file with chart is to use a template file which refers to data area which is filled with
+data using the API. The key point is to keep the data area dynamic. For example charts' _Y-Axis Area_ and and _Label Area_ can
+be pointed to named range which was created using the `OFFSET` function.
+
+You create new dynamic named range using menu _Insert - Name - Define_. The formula will be similar to following one:
+
+----
+=OFFSET(Sheet1!$A$1,0,0,Sheet1!$D$1,2)
+----
+First parameter is the the very first cell (top left).
+
+Second and third parameter are row and column offset and we can keep them zero all the time.
+
+Third parameter is number of rows to expand the range - this is the number of items printed and it needs to be stored in the spreadsheet somewhere and referenced here in the formula.
+
+Fourth parameter is the column width of the range, e.g. 2 for a range having just two columns.
+
+CAUTION: Syntax of functions and name of the functions varies in different language mutations of MS Excel.
+http://www.piuha.fi/excel-function-name-translation/[Excel function name translation page] may be handy to figure out
+the proper name of the `OFFSET` function in your locale. In locales where comma (',') is used for decimal point you may
+need to replaces commas in the formula with semicolons `;`.
+
+Named range cannot be used for chart data for the pie chart but two dynamic named ranges can be used for _Y-Axis_ and _Labels_ areas.
+
+Once you have your template spreadsheet file ready with graphs and dynamic ranges you can simply pass it to the `build` method:
+
+[source,groovy]
+----
+builder.build(templateFile) {                                               <1>
+    sheet('Data') {                                                         <2>
+        row(2) {                                                            <3>
+            cell 'Cars'
+            cell 1234.56
+        }
+    }
+}
+----
+
+<1> Existing template is passed into the build method
+<2> Either existing sheet `Data` is matched or new one is created
+<3> Existing cells are rewritten or new ones are created in if not present in the template file yet
+
+==== Solution
+
+You can verify your solution with the reference one link:solutions/04.html[here].
+
+
+=== 5. Pixel Art
+
+.Pixel Art
+****
+
+Draw following smiley inside 1 cm grid.
+
+image::smiley.png[]
+****
+
+Implement method `drawSmiley` in `ExcelIntegration` class to make `_05_HappySpec` passing.
+See link:solutions/test04.xlsx[existing file] for reference.
+
+==== Using the Definition References
+
+You can obtain the reference to _definition objects_ as the first parameter of definition closure.
+These objects can be used in situations when another closure would shadow the delegate scope of the closure
+or when you want to refactor code and extract part of the builder calls into separate methods.
+
+[source,groovy]
+----
+row { RowDefinition rd ->
+    10.times {
+        rd.cell it
+    }
+}
+----
+
+==== Solution
+
+You can verify your solution with the reference one link:solutions/05.html[here].
+
+== Reading Spreadsheets
+
+Last 3 exercises will show you how you can read files using spreadsheet criteria.
+
+=== 6. Data Migration
+
+.Data Migration
+****
+As a developer you are asked to import legacy data into new system. You only have data available in the form
+of spreadsheet (_Sales Report_). You don't have to take care about _Customers_ and _Products_ duplicities (these
+would be handeled by underlying persistence store).
+****
+
+Implement method `loadOrders` in `ExcelIntegration` class to make `_06_ImportOrdersSpec` passing.
+The input data is similar to link:solutions/test01.xlsx[Sales Report] generated in exercise 1.
+
+==== Criteria Basics
+
+Spreadsheet criteria follow the very same nested structure as the builder. For example to find a cell with
+the value `Order Number` you can write following piece of code:
+
+[source,groovy]
+----
+SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forStream(inputStream)    // <1>
+Cell orderNumberHeader = criteria.query {                                               // <2>
+    sheet {
+        row {
+            cell {
+                value 'Order Number'                                                    // <3>
+}   }   }   }.cell                                                                      // <4>
+Integer cellColumn = orderNumberHeader?.column                                          // <5>
+----
+
+<1> There is only one implementation at the moment which is based on Apache POI
+<2> Create new criteria query
+<3> Query for cell will value `Order Number` within any column, row or sheet
+<4> Return just a single cell or `null` if not found
+<5> Return the numeric index of the column (1-based)
+
+There are some handy predicates such as `range` you can add to method calls such as `row`.
+Row and column numbers always starts with `1` as this is the number you can see in the spreadsheet.
+
+[source,groovy]
+----
+SpreadsheetCriteriaResult orderNumbers = criteria.query {
+    sheet {
+        row(range(2, 5)) {                                                              // <1>
+            cell('B')                                                                   // <2>
+}   }   }
+----
+
+<1> Return only rows from `2` to `5`
+<2> Return only cells in the column `B`
+
+==== Data Rows
+
+If you have typical data dump spreadsheet with headers in one row and data in the rest of the rows
+you can wrap existing `Row` object into `DataRow` which allows to retrieve cells using the subscript operator `[]`.
+
+
+[source,groovy]
+----
+DataRow dataRow = DataRow.create(orderRow, headerRow)
+Object customerName = dataRow['Customer Name'].value
+----
+
+==== Reading Cell Values
+
+When you get the `value` property of the `Cell` the return type will correspond the current type of the
+cell stored in the spreadsheet (e.g. `String` or `Number`). This is problematic especially with temporal data
+as these are stored as numbers as well. To read the values in appropriate type you can use `read` method of the cell
+which accepts single parameter which is the desired type.
+
+[source,groovy]
+----
+Cell dateCell = dataRow['Order Date']
+Date date = dateCell?.read(Date)
+----
+
+==== Solution
+
+You can verify your solution with the reference one link:solutions/06.html[here].
+
+=== 7. Order Received
+
+.Order Received
+****
+Your company is ordering goods from _ACME Corp._ regulary. Order summary spreadsheet is always sent by email when
+the order is dispatched. You are asked to import the new product quantities into your internal system for each order.
+****
+
+Implement method `loadProducts` in `ExcelIntegration` class to make `_07_ImportProductsSpec` passing.
+The input data is similar to link:solutions/test04-EMEA.xlsx[Order] generated in exercise 4.
+
+==== Navigating the Result
+
+You can easily navigate next or previous sheets using `next` and `previous` properties of the sheet.
+
+You can easily navigate next or previous rows using `above` and `bellow` properties of the row.
+
+You can easily navigate the cells around selected cell using `above`, `aboveRight`, `right`, `bellowRight`, `bellow`,
+`bellowLeft`, `left` and `aboveLeft` properties of the cell.
+
+[source,groovy]
+----
+Cell qtyHeadline = criteria.query {
+    sheet {
+        row {
+            cell {
+                value 'Qty'
+            }
+        }
+    }
+}
+Integer firstQty = qty.bellow.read(Integer)
+----
+
+==== Solution
+
+You can verify your solution with the reference one link:solutions/07.html[here].
+
+=== 8. LADS Challenge
+
+.LADS Challenge
+****
+LADS is a company which is accredited to manage all the time tables for public transport in your country. They are
+obligated by law to make the data available to public. To keep the monopoly they publish the data as spreadsheets
+containing service hours for each stop. You are asked to read all the departures from the Airport stop for bus line 200
+on the working day.
+
+image::servicehours.png[Service Hours for Bus 200]
+****
+
+Implement method `loadDeparturesFromTheAirportWD` in `ExcelIntegration` class to make `_08_ImportServiceHoursSpec` passing.
+The input data can be found at `excel-in-groovy/eig.model.test/src/main/resources/eig/model/test/servicehours.xlsx`.
+
+==== Solution
+
+You can verify your solution with the reference one link:solutions/08.html[here].

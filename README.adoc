@@ -1,0 +1,3 @@
+= Excel in Groovy Workshop
+
+See the workshop notes http://musketyr.github.io/excel-in-groovy[here]
