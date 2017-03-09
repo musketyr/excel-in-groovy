@@ -119,7 +119,7 @@ Make sure the texts displayed fit into the colums and numbers and dates are form
 ****
 
 Implement method `buildSalesReport` in `ExcelIntegration` class to make `_01_SalesReportSpec` passing.
-See link:solutions/test01.xlsx[existing file] for reference.
+See link:xlsx/test01.xlsx[existing file] for reference.
 
 ==== Builder Basics
 
@@ -212,7 +212,7 @@ The headlines should be centered, bold and they should have been written using b
 ****
 
 Implement method `buildExecutiveReport` in `ExcelIntegration` class to make `_02_ExecutiveReportSpec` passing.
-See link:solutions/test02.xlsx[existing file] for reference.
+See link:xlsx/test02.xlsx[existing file] for reference.
 
 ==== Merging Cells
 
@@ -311,7 +311,7 @@ world print _EUR_ instead and make the border thick and thin respectively.
 ****
 
 Implement method `buildOrder` in `ExcelIntegration` class to make `_03_ExportOrderAsExcelSpec` passing.
-See link:solutions/test03-EMEA.xlsx[existing file for EMEA region] and link:solutions/test03-NA.xlsx[the rest of the world] for reference.
+See link:xlsx/test03-EMEA.xlsx[existing file for EMEA region] and link:xlsx/test03-NA.xlsx[the rest of the world] for reference.
 
 ==== Page Settings
 
@@ -403,7 +403,7 @@ Create two charts displaying cumulated sales by territory and by product line.
 ****
 
 Implement method `fillData` in `ExcelIntegration` class to make `_04_FillDataSpec` passing.
-See link:solutions/test04.xlsx[existing file] for reference.
+See link:xlsx/test04.xlsx[existing file] for reference.
 
 ==== Beyond the Builder (Charts etc.)
 
@@ -466,7 +466,7 @@ image::smiley.png[]
 ****
 
 Implement method `drawSmiley` in `ExcelIntegration` class to make `_05_HappySpec` passing.
-See link:solutions/test04.xlsx[existing file] for reference.
+See link:xlsx/test05.xlsx[existing file] for reference.
 
 ==== Using the Definition References
 
@@ -501,7 +501,7 @@ would be handeled by underlying persistence store).
 ****
 
 Implement method `loadOrders` in `ExcelIntegration` class to make `_06_ImportOrdersSpec` passing.
-The input data is similar to link:solutions/test01.xlsx[Sales Report] generated in exercise 1.
+The input data is similar to link:xlsx/test01.xlsx[Sales Report] generated in exercise 1.
 
 ==== Criteria Basics
 
@@ -579,7 +579,7 @@ the order is dispatched. You are asked to import the new product quantities into
 ****
 
 Implement method `loadProducts` in `ExcelIntegration` class to make `_07_ImportProductsSpec` passing.
-The input data is similar to link:solutions/test04-EMEA.xlsx[Order] generated in exercise 4.
+The input data is similar to link:xlsx/test03-EMEA.xlsx[Order] generated in exercise 3.
 
 ==== Navigating the Result
 

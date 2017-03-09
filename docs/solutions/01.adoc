@@ -4,7 +4,7 @@
 
 This is reference solution to the Sales Report exercise.
 
-You can see the generated file link:test01.xlsx[here].
+You can see the generated file link:../xlsx/test01.xlsx[here].
 
 [source,groovy]
 ----
