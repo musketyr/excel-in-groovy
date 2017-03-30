@@ -17,7 +17,7 @@ class _01_SalesReportSpec extends Specification {
             TestFiles.open excelFile
         and:
             SpreadsheetCriteria criteria = PoiSpreadsheetCriteria.FACTORY.forFile(excelFile)
-            List<Cell> cells = criteria.all()
+            Collection<Cell> cells = criteria.all().cells
         then:
             noExceptionThrown()
             cells.size() == 62128
